@@ -16,6 +16,7 @@ func main() {
 	bags := regexp.MustCompile("\n").Split(strings.TrimRight(string(data), "\n"), -1)
 
 	canContainMap := map[string]map[string]int{}
+	containsMap := map[string]map[string]int{}
 
 	for _, bag := range bags {
 		bagParts := strings.Split(bag, ",")
@@ -35,15 +36,39 @@ func main() {
 			if _, exists := canContainMap[innerBag][container]; exists {
 				log.Fatal("Already have mapping for ", b)
 			}
-
 			canContainMap[innerBag][container] = count
+
+			if _, exists := containsMap[container]; !exists {
+				containsMap[container] = map[string]int{}
+			}
+			if _, exists := containsMap[container][innerBag]; exists {
+				log.Fatal("Already have mapping for ", b)
+			}
+			if count > 0 {
+				containsMap[container][innerBag] = count
+			}
 		}
 	}
 	log.Print(canContainMap["shiny gold"])
 	acc, colors := canContain(canContainMap, "shiny gold")
 
 	log.Print(len(visited)-1, acc, len(colors))
+	log.Print("Contains: ", containCount(containsMap, "shiny gold"))
 	log.Print("Done")
+}
+
+func containCount(containsMap map[string]map[string]int, color string) (acc int) {
+	if _, exists := containsMap[color]; !exists {
+		acc = 1
+		return
+	}
+
+	for color, numBags := range containsMap[color] {
+		cnt := containCount(containsMap, color) + 1
+		log.Print(color, " ", numBags, " ", cnt)
+		acc += (cnt * numBags)
+	}
+	return
 }
 
 var visited = map[string]bool{}
