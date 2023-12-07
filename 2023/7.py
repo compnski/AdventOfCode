@@ -14,7 +14,22 @@ lines = data.split("\n")
 
 hand_bids = [line.split(" ") for line in lines]
 
-cards = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"]
+#cards = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"]
+cards = [
+    "A",
+    "K",
+    "Q",
+    "T",
+    "9",
+    "8",
+    "7",
+    "6",
+    "5",
+    "4",
+    "3",
+    "2",
+    "J",
+]
 cards.reverse()
 print(cards)
 
@@ -23,37 +38,22 @@ def rank(card):
     return cards.index(card)
 
 
-# def handbid_to_key(hand_bid):
-#     hand = [*hand_bid[0]]
-#     hand.sort()
-#     handStr = "".join(hand)
-#     print(handStr)
-#     for n in range(4, -1, -1):
-#         pat = f"(\w)\\1{{{n}}}"
-#         print(pat)
-#         if re.search(pat, handStr):
-#             key = rank(hand_bid[0][0]) + (10 * (n + 1))
-#             print(n, handStr, key)
-#             return key
-
-
 def hand_kind(hand_bid):
-    hand = [*hand_bid[0]]
-    hand.sort()
-    handStr = "".join(hand)
-    for n in range(4, -1, -1):
-        pat = f"(\w)\\1{{{n}}}"
-        if m := re.search(pat, handStr):
-            matchedletter = m.group()[0]
-            if n == 2 or n == 1:
-                if re.search(f"([^{matchedletter}])\\1", handStr):
-                    return n + 1.5  # fullhouse / two pair
-            return n + 1
+    hand = hand_bid[0]
+    jokercount = hand.count("J")
+    counts = [
+        n for n in (hand.count(card) for card in cards if card != "J") if n > 0
+    ]
+    counts.sort(reverse=True)
+    if len(counts) == 0:
+        return jokercount
 
-
-# 246758041
-# 246438593
-#64833338
+    rank = counts[0] + jokercount
+    if rank > 3:
+        return rank
+    if counts[1] == 2:
+        return rank + 0.5
+    return rank
 
 
 def hand_score(hand_bid):
@@ -76,6 +76,7 @@ for hand_bid in hand_bids:
 scores = [
     int(bid) * (rank + 1) for [rank, [hand, bid]] in enumerate(hand_bids)
 ]
-print(len(scores))
-print(scores)
+
+#print(len(scores))
+#print(scores)
 print(sum(scores))
