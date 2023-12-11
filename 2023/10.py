@@ -26,16 +26,20 @@ data = open("10.txt", "r").read().strip()
 # L.L7LFJ|||||FJL7||LJ
 # L7JLJL-JLJLJL--JLJ.L"""
 
-data = """.F----7F7F7F7F-7....
-.|F--7||||||||FJ....
-.||.FJ||||||||L7....
-FJL7L7LJLJ||LJ.L-7..
-L--J.L7...LJS7F-7L7.
-....F-J..F7FJ|L7L7L7
-....L7.F7||L7|.L7L7|
-.....|FJLJ|FJ|F7|.LJ
-....FJL-7.||.||||...
-....L---J.LJ.LJLJ..."""
+# data = """.F----7F7F7F7F-7....
+# .|F--7||||||||FJ....
+# .||.FJ||||||||L7....
+# FJL7L7LJLJ||LJ.L-7..
+# L--J.L7...LJS7F-7L7.
+# ....F-J..F7FJ|L7L7L7
+# ....L7.F7||L7|.L7L7|
+# .....|FJLJ|FJ|F7|.LJ
+# ....FJL-7.||.||||...
+# ....L---J.LJ.LJLJ..."""
+
+start_char = "F"
+
+#start_char = "7"
 
 height = data.count("\n")
 width = len(data.strip().split("\n")[0])
@@ -69,36 +73,33 @@ dirs = {
 bigdots = {
     "F": (
         (0, 0, 0),  #
-        (0, 1, 1),  #
+        (0, 2, 1),  #
         (0, 1, 0)),  #
     "-": (
         (0, 0, 0),  #
-        (1, 1, 1),  #
+        (1, 2, 1),  #
         (0, 0, 0)),  #
     "7": (
         (0, 0, 0),  #
-        (1, 1, 0),  #
+        (1, 2, 0),  #
         (0, 1, 0)),  #
     "|": (
         (0, 1, 0),  #
-        (0, 1, 0),  #
+        (0, 2, 0),  #
         (0, 1, 0)),  #
     "L": (
         (0, 1, 0),  #
-        (0, 1, 1),  #
+        (0, 2, 1),  #
         (0, 0, 0)),  #
     "J": (
         (0, 1, 0),  #
-        (1, 1, 0),  #
+        (1, 2, 0),  #
         (0, 0, 0)),  #
     ".": (
         (0, 0, 0),  #
-        (0, 0, 0),  #
+        (0, 2, 0),  #
         (0, 0, 0)),  #
 }
-
-start_char = "F"
-#start_char = "7"
 
 distances: Dict[int, int] = defaultdict(int)
 
@@ -111,9 +112,10 @@ def get_next(idx, dirlist: Optional[Tuple[Tuple[int, int], Tuple[int, int]]]):
 
 
 start = data.index("S")
-
 print(start)
 first, last = get_next(start, dirs.get(start_char))
+distances[start] = 0
+distances[last] = 1
 
 print([first, pos(first), last, pos(last)])
 
@@ -147,6 +149,7 @@ img = PIL.Image.new("L", (width * 3 + 3, height * 3 + 3))
 def update_bigmap(idx, char):
     if char == "S":
         char = start_char
+    is_pipe = idx in distances
     triples = bigdots[char]
     if char != ".":
         print(char, triples)
@@ -154,6 +157,8 @@ def update_bigmap(idx, char):
     for dx in range(-1, 2):
         for dy in range(-1, 2):
             wall = triples[dy + 1][dx + 1]
+            if is_pipe:
+                wall = min(wall, 1)
             if char != ".":
                 print(idx, (3 * x + dx, 3 * y + dy), wall)
             img.putpixel((3 * x + dx, 3 * y + dy), wall * 128)
